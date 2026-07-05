@@ -4,8 +4,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 const URL_TOC = 'https://laws.e-gov.go.jp/api/1/lawlists/1?LawType=1';
 const URL_BOOK = 'https://laws.e-gov.go.jp/api/1/lawdata/';
 const PATH_TOC_XML = __DIR__ . "/../data/book_id.xml";
-const PATH_BOOK_BODY_XML = __DIR__ . "/../xml/%s_%s.xml";
-const PATH_BOOK_TOC = __DIR__ . "/../tmp/%s_%s_toc.balade.html";
+const PATH_BOOK_BODY_XML = __DIR__ . "/../data/xml/%s_%s.xml";
+const PATH_BOOK_TOC = __DIR__ . "/../data/cache/%s_%s_toc.balade.html";
 
 const TOC_OFFSET = 3;
 const TOC_FMT = [
