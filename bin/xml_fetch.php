@@ -6,6 +6,7 @@ const URL_BOOK = 'https://laws.e-gov.go.jp/api/1/lawdata/';
 const PATH_TOC_XML = __DIR__ . "/../data/book_id.xml";
 const PATH_BOOK_BODY_XML = __DIR__ . "/../data/xml/%s_%s.xml";
 const PATH_BOOK_TOC = __DIR__ . "/../data/cache/%s_%s_toc.balade.html";
+const PATH_DB = __DIR__ . "/../data/prebar.sqlite";
 
 const TOC_OFFSET = 3;
 const TOC_FMT = [
@@ -22,6 +23,54 @@ const FMT_ARTICLE = "<p class='article ' id='%s'>"
     . "%s"
     . "</p>\n";
 # $content = sprintf(FMT_ARTICLE, $key, $key, $num_raw, $key, $key, $captions);
+
+$pdo = Null;
+function save_db(
+    $pdo,
+    $book_id, $id_node, $id_parent, $type, $num, $num_parent, $depth, $title, $content
+)
+{
+    try {
+        // 2. INSERT文の準備（? はプレースホルダ）
+        $sql = "INSERT INTO article "
+            . "(book_id, id_me, id_parent, type, num, num_parent, depth, title, content)"
+            . " VALUES (:book_id, :id_me, :id_parent, :type, :num, :num_parent, :depth, :title , :content)";
+        $stmt = $pdo->prepare($sql);
+
+        // 3. 値をバインドして実行
+        /*
+        $params = [
+            ':book_id' => $book_id,
+            ':id_me' => (int)$id_node,
+            ':id_parent' => (int)$id_parent,
+            ':type' => (int)$type,
+            ':num' => $num,
+            ':num_parent' => $num_parent,
+            ':depth' => (int)$depth,
+            ':title' => $title,
+            ':content' => $content,
+        ];
+        */
+        $params = [
+            ':book_id' => $book_id,
+            ':id_me' => (int)$id_node,
+            ':id_parent' => (int)$id_parent,
+            ':type' => (int)$type,
+            ':num' => $num,
+            ':num_parent' => $num_parent,
+            ':depth' => (int)$depth,
+            ':title' => $title,
+            ':content' => $content,
+        ];
+        $rows = $stmt->execute($params);
+
+        echo "書き込みが完了しました！ {$rows}件\n";
+
+    } catch (PDOException $e) {
+        echo "エラーが発生しました: " . $e->getMessage() . "\n";
+    }
+}
+
 function getBookXml($xml, $book): ?string
 {
     $filename = sprintf(PATH_BOOK_BODY_XML, $book["id"], $book["abbr"]);
@@ -60,17 +109,14 @@ function renum($num)
     return implode('_', $arr);
 }
 
+$i_node = 0;
 function toc_recursive($book, $node, $depth, $fp): void
 {
-    // Articleより前の目次
-    if (str_contains($node->nodeName, "Title")) {
-        $content = sprintf(TOC_FMT[$depth - TOC_OFFSET], $node->textContent);
-        fwrite($fp, $content);
-        printf("%05d %s %s\n", $depth, $node->nodeName, $node->textContent);
-    }
+    global $i_node;
 
     // Articleの場合、リンクを表示
     if (str_contains($node->nodeName, "Article")) {
+        $i_node++;
         //Articleのすぐ下にある条文の付属譲歩を取得
         $num_raw = $node->getAttribute("Num");
         $num = renum($num_raw);
@@ -78,7 +124,17 @@ function toc_recursive($book, $node, $depth, $fp): void
         $captions = $node->getElementsByTagName('ArticleCaption')->item(0)->nodeValue ?? '';
         $content = sprintf(FMT_ARTICLE, $key, $key, $num_raw, $key, $key, $captions);
         fwrite($fp, $content);
+        save_db();
         return;
+    }
+
+    // Articleより前の目次
+    if (str_contains($node->nodeName, "Title")) {
+        $i_node++;
+        $content = sprintf(TOC_FMT[$depth - TOC_OFFSET], $node->textContent);
+        fwrite($fp, $content);
+        printf("%05d, %05d %s %s\n", $i_node, $depth, $node->nodeName, $node->textContent);
+        save_db();
     }
 
     // Article以下は上に戻っているので、それ以外で子要素がある場合再帰処理
@@ -91,9 +147,11 @@ function toc_recursive($book, $node, $depth, $fp): void
 
 function make_toc($book, $xml, $fp)
 {
+    global $i_node;
     $dom = new DOMDocument();
     $dom->loadXML($xml);
     $targetNode = $dom->getElementsByTagName('MainProvision')->item(0);
+    $i_node = 0;
     toc_recursive($book, $targetNode, 1, $fp);
 }
 
@@ -133,7 +191,7 @@ EOT;
 
 function main(): void
 {
-    global $header, $footer;
+    global $header, $footer, $pdo;
     # configの読み込み
     $config = require("config.php");
 
@@ -146,6 +204,15 @@ function main(): void
         # あればローカルから
         $toc_xml = file_get_contents(PATH_TOC_XML);
     }
+
+    // 1. データベースへの接続 (ファイルがない場合は自動作成されます)
+    if (!file_exists(PATH_DB)) die("データベースファイルが見つかりません。");
+    $pdo = new PDO("sqlite:" . PATH_DB);
+
+    // エラーモードを例外に設定（デバッグしやすくなります）
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+
 # configに書いている法令名からIDと本体をとってくる
     foreach ($config['books'] as $book) {
         $book_xml = getBookXml($toc_xml, $book);

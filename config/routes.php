@@ -41,5 +41,7 @@ use Psr\Container\ContainerInterface;
 
 return static function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
     $app->get('/', HomePageHandler::class, 'home');
+    $app->get('/toc', HomePageHandler::class, 'toc.default');
+    $app->get('/toc/{id}', HomePageHandler::class, 'toc.detail');
     $app->get('/api/ping', PingHandler::class, 'api.ping');
 };

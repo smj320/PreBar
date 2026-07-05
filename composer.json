@@ -56,7 +56,9 @@
         "mezzio/mezzio-helpers": "^5.20",
         "laminas/laminas-servicemanager": "^3.22",
         "mezzio/mezzio-fastroute": "^3.11.0",
-        "mezzio/mezzio-laminasviewrenderer": "^2.15"
+        "mezzio/mezzio-laminasviewrenderer": "^2.15",
+      "ext-dom": "*",
+      "ext-pdo": "*"
     },
     "require-dev": {
         "laminas/laminas-coding-standard": "^3.1.0",

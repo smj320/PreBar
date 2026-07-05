@@ -15,8 +15,8 @@
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
             <!-- ロゴやサイト名 -->
-            <a class="navbar-brand" href="/index.php">
-                <img src="./img/logo.jpg" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
+            <a class="navbar-brand" href="/">
+                <img src='/img/logo.jpg' alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
                 PreBar
             </a>
 
@@ -32,7 +32,7 @@
                     <li class="nav-item mt-2 mt-lg-0">
                         <div class="d-flex flex-wrap gap-1">
                             <?php foreach($books as $book): ?>
-                                <a class="nav-link" href="/?book_id=<?=$book['id']?>">
+                                <a class="nav-link" href="/toc/<?=$book['id']?>">
                                     <?= $book['abbr'] ?>
                                 </a>
                             <?php endforeach ?>

@@ -23,9 +23,9 @@ final class HomePageHandler implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $config = require __DIR__.'/../../../bin/config.php';
-        $params = $request->getQueryParams();
-        $book_id = $params['book_id'] ?? '01';
-        $key = $config["books"][$book_id]["key"];
+
+        $id = $request->getAttribute('id') ?? '01';
+        $key = $config["books"][$id]["key"];
 
         $args = ["pageTitle"=>$key];
         return new HtmlResponse($this->template->render('app::home-page', $args));
