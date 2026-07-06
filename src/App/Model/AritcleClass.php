@@ -40,8 +40,7 @@ class AritcleClass
         );
         try {
             $stmt = $pdo->prepare($sql);
-            $rows = $stmt->execute($sqlData['values']);
-            echo "書き込みが完了しました！ {$rows}件\n";
+            $stmt->execute($sqlData['values']);
         } catch (PDOException $e) {
             echo "エラーが発生しました: " . $e->getMessage() . "\n";
         }

@@ -49,21 +49,26 @@ function renum($num)
     return implode('_', $arr);
 }
 
+/*
+ * 再帰処理
+*/
 $c_article = new AritcleClass();
-$id_me = 0;
+$id_counter = 0;
 const ARROWED_TAGS = ["MainProvision", "Part", "Chapter", "Section", "Article", "Paragraph"];
 function toc_recursive($book, $node, $depth, $id_parent, $pdo): void
 {
     global $c_article;
-    global $id_me;
+    global $id_counter;
 
     //MainProvision直下でないものはスキップ。必要な子要素は親から覗く
     $name = $node->nodeName;
     if (!in_array($name, ARROWED_TAGS)) {
         return;
     }
+    $id_counter += 1;
+    $id_me = $id_counter;
+    printf("me %04d, parent %04d %s\n", $id_me, $id_parent, $name);
 
-    $id_me = $id_me + 1;
     //Articleのすぐ下にある条文の付属譲歩を取得
     $num_raw = $node->getAttribute("Num");
     $num = renum($num_raw);
@@ -97,11 +102,11 @@ function toc_recursive($book, $node, $depth, $id_parent, $pdo): void
 
 function make_toc($book, $xml): void
 {
-    global $i_node;
+    global $id_counter;
     $dom = new DOMDocument();
     $dom->loadXML($xml);
     $targetNode = $dom->getElementsByTagName('MainProvision')->item(0);
-    $i_node = 0;
+    $id_counter = 0;
     $pdo = new PDO("sqlite:" . PATH_DB);
     toc_recursive($book, $targetNode, 1, $i_node, $pdo);
 }
