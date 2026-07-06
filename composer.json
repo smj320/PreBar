@@ -47,18 +47,18 @@
     },
     "require": {
         "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+        "ext-dom": "*",
+        "ext-pdo": "*",
         "composer/package-versions-deprecated": "^1.11.99.5",
         "laminas/laminas-component-installer": "^2.6 || ^3.5",
         "laminas/laminas-config-aggregator": "^1.18",
         "laminas/laminas-diactoros": "^3.8.0",
+        "laminas/laminas-servicemanager": "^3.22",
         "laminas/laminas-stdlib": "^3.21",
         "mezzio/mezzio": "^3.23.1",
-        "mezzio/mezzio-helpers": "^5.20",
-        "laminas/laminas-servicemanager": "^3.22",
         "mezzio/mezzio-fastroute": "^3.11.0",
-        "mezzio/mezzio-laminasviewrenderer": "^2.15",
-      "ext-dom": "*",
-      "ext-pdo": "*"
+        "mezzio/mezzio-helpers": "^5.20",
+        "mezzio/mezzio-laminasviewrenderer": "^2.15"
     },
     "require-dev": {
         "laminas/laminas-coding-standard": "^3.1.0",
