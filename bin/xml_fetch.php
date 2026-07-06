@@ -108,7 +108,7 @@ function make_toc($book, $xml): void
     $targetNode = $dom->getElementsByTagName('MainProvision')->item(0);
     $id_counter = 0;
     $pdo = new PDO("sqlite:" . PATH_DB);
-    toc_recursive($book, $targetNode, 1, $i_node, $pdo);
+    toc_recursive($book, $targetNode, 1, 1, $pdo);
 }
 
 function main(): void

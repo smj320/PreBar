@@ -3,7 +3,8 @@
 declare(strict_types=1);
 
 use App\Handler\HomePageHandler;
-use App\Handler\PingHandler;
+use App\Handler\ArticleGetHandler;
+use App\Handler\ArticlePostHandler;
 use Mezzio\Application;
 use Mezzio\MiddlewareFactory;
 use Psr\Container\ContainerInterface;
@@ -42,6 +43,7 @@ use Psr\Container\ContainerInterface;
 return static function (Application $app, MiddlewareFactory $factory, ContainerInterface $container): void {
     $app->get('/', HomePageHandler::class, 'home');
     $app->get('/toc', HomePageHandler::class, 'toc.default');
-    $app->get('/toc/{id}', HomePageHandler::class, 'toc.detail');
-    $app->get('/api/ping', PingHandler::class, 'api.ping');
+    $app->get('/toc/{id_book}', HomePageHandler::class, 'toc.detail');
+    $app->get('/article/{id_book}/{num}/{id_type}', ArticleGetHandler::class, 'article.get');
+    $app->post('/article/{id_book}/{num}/{id_type}', ArticlePostHandler::class, 'article.post');
 };
