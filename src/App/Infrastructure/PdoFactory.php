@@ -4,13 +4,11 @@ namespace App\Infrastructure;
 
 use PDO;
 use Psr\Container\ContainerInterface;
-class PdoFactor
+class PdoFactory
 {
     public function __invoke(ContainerInterface $container)
     {
-        $config = $container->get('config');
-        var_dump($config);
-        $dsn = "sqlite:' . __DIR__ . '/../../data/prebar.sqlite";
+        $dsn = $container->get('config')['db']['dsn'];
         $pdo = new PDO($dsn);
 
         // エラーが発生した際に例外を投げる設定（必須級）

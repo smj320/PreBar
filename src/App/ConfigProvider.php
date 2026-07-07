@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App;
 
+use PDO;
+
 /**
  * The configuration provider for the App module
  *
@@ -35,6 +37,7 @@ class ConfigProvider
                 //Handler\PingHandler::class => Handler\PingHandler::class,
             ],
             'factories'  => [
+                PDO::class => Infrastructure\PdoFactory::class,
                 Handler\HomePageHandler::class => Handler\HomePageHandlerFactory::class,
                 Handler\ArticleGetHandler::class => Handler\ArticleGetHandlerFactory::class,
                 Handler\ArticlePostHandler::class => Handler\ArticlePostHandlerFactory::class,

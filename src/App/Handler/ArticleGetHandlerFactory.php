@@ -23,8 +23,7 @@ final class ArticleGetHandlerFactory
             ? $container->get(TemplateRendererInterface::class)
             : null;
         assert($template instanceof TemplateRendererInterface || null === $template);
-        $config = require __DIR__ . '/../../../config/config.php';
-        $pdo = new PDO($config['dsn']);
-        return new  ArticleGetHandler($pdo,$container::class, $router, $template);
+
+        return new  ArticleGetHandler($container->get(PDO::class),$container::class, $router, $template);
     }
 }

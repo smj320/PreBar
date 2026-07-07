@@ -23,9 +23,7 @@ final class HomePageHandlerFactory
             ? $container->get(TemplateRendererInterface::class)
             : null;
         assert($template instanceof TemplateRendererInterface || null === $template);
-        //$config = require __DIR__ . '/../../../config/config.php';
-        $dsn = "sqlite:/Users/kikuchi/Projects/PhpstormProjects/PreBar/data/prebar.sqlite";
-        $pdo = new PDO($dsn);
-        return new HomePageHandler($pdo, $container::class, $router, $template);
+
+        return new HomePageHandler($container->get(PDO::class), $container::class, $router, $template);
     }
 }
