@@ -8,6 +8,7 @@ use Mezzio\Router\RouterInterface;
 use Mezzio\Template\TemplateRendererInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use PDO;
 
 use function assert;
 
@@ -22,7 +23,9 @@ final class HomePageHandlerFactory
             ? $container->get(TemplateRendererInterface::class)
             : null;
         assert($template instanceof TemplateRendererInterface || null === $template);
-
-        return new HomePageHandler($container::class, $router, $template);
+        //$config = require __DIR__ . '/../../../config/config.php';
+        $dsn = "sqlite:/Users/kikuchi/Projects/PhpstormProjects/PreBar/data/prebar.sqlite";
+        $pdo = new PDO($dsn);
+        return new HomePageHandler($pdo, $container::class, $router, $template);
     }
 }

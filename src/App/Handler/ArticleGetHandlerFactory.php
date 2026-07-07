@@ -6,6 +6,7 @@ namespace App\Handler;
 
 use Mezzio\Router\RouterInterface;
 use Mezzio\Template\TemplateRendererInterface;
+use PDO;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
@@ -22,7 +23,8 @@ final class ArticleGetHandlerFactory
             ? $container->get(TemplateRendererInterface::class)
             : null;
         assert($template instanceof TemplateRendererInterface || null === $template);
-
-        return new  ArticleGetHandler($container::class, $router, $template);
+        $config = require __DIR__ . '/../../../config/config.php';
+        $pdo = new PDO($config['dsn']);
+        return new  ArticleGetHandler($pdo,$container::class, $router, $template);
     }
 }

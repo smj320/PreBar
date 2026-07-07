@@ -15,6 +15,7 @@ use PDO;
 final class ArticleGetHandler implements RequestHandlerInterface
 {
     public function __construct(
+        private readonly PDO                        $pdo,
         private readonly string                     $containerName,
         private readonly RouterInterface            $router,
         private readonly ?TemplateRendererInterface $template = null
@@ -22,16 +23,24 @@ final class ArticleGetHandler implements RequestHandlerInterface
     {
     }
 
+
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $config = require __DIR__ . '/../../../bin/config.php';
+        $dummy = <<<EOM
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
+do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+Ut enim ad minim veniam, quis nostrud exercitation ullamco 
+laboris nisi ut aliquip ex ea commodo consequat.
+EOM;
+
+        $config = require __DIR__ . '/../../../config/config.php';
 
         $id = $request->getAttribute('id_book') ?? '010';
-        $book_id = $config["books"][$id]["id"];
+        $book_id = $config["books"][$id]["id"].$dummy;
         $key = $config["books"][$id]["key"];
 
         $line = sprintf("%s",$book_id);
-        $args = ["pageTitle" => $key, "body" => $line];
-        return new HtmlResponse($this->template->render('app::home-page', $args));
+        $args = ["pageTitle" => $key, "article" => $line];
+        return new HtmlResponse($this->template->render('app::article', $args));
     }
 }

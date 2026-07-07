@@ -15,23 +15,23 @@ use PDO;
 final class HomePageHandler implements RequestHandlerInterface
 {
     public function __construct(
-        private readonly string                     $containerName,
-        private readonly RouterInterface            $router,
-        private readonly ?TemplateRendererInterface $template = null
+        public readonly PDO                         $pdo,
+        public readonly string                     $containerName,
+        public readonly RouterInterface            $router,
+        public readonly ?TemplateRendererInterface $template = null
     )
     {
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $config = require __DIR__ . '/../../../bin/config.php';
+        $config = require __DIR__ . '/../../../config/config.php';
 
         $id = $request->getAttribute('id_book') ?? '010';
         $book_id = $config["books"][$id]["id"];
         $key = $config["books"][$id]["key"];
 
-        $pdo = new PDO($config['dsn']);
-        $stmt = $pdo->prepare("SELECT * FROM article WHERE id_book = :book_id");
+        $stmt = $this->pdo->prepare("SELECT * FROM article WHERE id_book = :book_id");
         $stmt->execute([":book_id" => $book_id]);
         $articles = $stmt->fetchAll();;
         $line = "";

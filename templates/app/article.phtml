@@ -1,0 +1,15 @@
+<?php
+$this->headTitle($this->pageTitle)
+?>
+
+<h1><?= $this->pageTitle ?></h1>
+
+<form>
+    <div class="form-group">
+        <textarea class="form-control rows=40">
+        <?= $this->article ?>
+    </textarea>
+        <br/>
+        <button type="submit" class="btn btn-primary style=height: 800px;">送信</button>
+    </div>
+</form>

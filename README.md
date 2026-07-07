@@ -66,3 +66,63 @@ Partを処理する場合は、その下のPartTitleやPartCaptionを拾う。
 Part直下にArticleがある場合もあるが、<Chapter>の羅列ががある場合もある。
 <Article>の下には<ArticleTitle>第何条の型でかならずあるが、
 <ArticleCaption>は憲法や刑訴のようにない場合がある。
+
+
+## Factoryの登録のやり方
+
+共通でnewするようなクラスは、ファクトリークラスを作って共通で使う作り方を書いておく。
+アプリケーションで共通のものはApp/Infrastructure/PdoFactor.phpとかにおく。
+
+コンフィグに関してはconfig/autoload/local.phpに
+```php
+//SQLiteの場合
+return [
+    'db' => [
+        'dsn' => 'sqlite:' . __DIR__ . '/../../data/prebar.sqlite',
+    ],
+];
+//MySQLの場合
+return [
+    'db' => [
+        'dsn' => 'mysql:host=localhost;dbname=test_db;charset=utf8mb4',
+        'user' => 'db_user',
+        'pass' => 'db_pass',
+    ],
+];
+```
+
+```php
+namespace App\Infrastructure;
+
+use PDO;
+use Psr\Container\ContainerInterface;
+
+class PdoFactory
+{
+    public function __invoke(ContainerInterface $container)
+    {
+        $config = $container->get('config')['db'];
+        
+        $pdo = new PDO($config['dsn']);
+        
+        // エラーが発生した際に例外を投げる設定（必須級）
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // フェッチモードをデフォルトで連想配列にする設定（お好みで）
+        $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        
+        return $pdo;
+    }
+}
+```
+このクラスを作るレシピは App/ConfigProvider.phpに登録 に登録
+
+```php
+'dependencies' => [
+    'factories' => [
+        PDO::class => App\Infrastructure\PdoFactory::class,
+    ],
+],
+```
+
+ハンドラー等App/ConfigProvider.phpに登録。

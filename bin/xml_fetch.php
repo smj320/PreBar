@@ -115,7 +115,7 @@ function main(): void
 {
     global $id_me;
     # configの読み込み
-    $config = require("config.php");
+    $config = require(__DIR__ . "/../config/config.php");
 
     # 法典IDの入ったXMLを取り込む
     if (!file_exists(PATH_TOC_XML)) {
