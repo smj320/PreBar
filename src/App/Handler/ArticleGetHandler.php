@@ -35,12 +35,21 @@ EOM;
 
         $config = require __DIR__ . '/../../../config/config.php';
 
-        $id = $request->getAttribute('id_book') ?? '010';
-        $book_id = $config["books"][$id]["id"].$dummy;
-        $key = $config["books"][$id]["key"];
+        $id_book = $request->getAttribute('id_book') ?? '010';
+        $num = $request->getAttribute('num');
+        $id_type = $request->getAttribute('id_type');
+        $key = $config["books"][$id_book]["key"];
+        if($id_type == "01"){
+            $query = "SELECT * FROM article WHERE id_book = :id_book AND num=:num";
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute([":id_book" => $id_book, ":num" => $num]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $article = $row["article_xml"];
+        }else{
+            $article = "";
+        }
 
-        $line = sprintf("%s",$book_id);
-        $args = ["pageTitle" => $key, "article" => $line];
+        $args = ["pageTitle" => $key, "article" => $article];
         return new HtmlResponse($this->template->render('app::article', $args));
     }
 }
