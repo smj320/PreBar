@@ -26,6 +26,7 @@ return [
         ],
     ],
     'whoops'       => [
+        'editor' => 'phpstorm',
         'json_exceptions' => [
             'display'    => true,
             'show_trace' => true,

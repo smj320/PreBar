@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use App\Model\AritcleClass;
+use App\Model\Entity\Article;
+use Laminas\Db\TableGateway\TableGateway;
 
 const URL_TOC = 'https://laws.e-gov.go.jp/api/1/lawlists/1?LawType=1';
 const URL_BOOK = 'https://laws.e-gov.go.jp/api/1/lawdata/';
@@ -52,13 +53,16 @@ function renum($num)
 /*
  * 再帰処理
 */
-$c_article = new AritcleClass();
+
 $id_counter = 0;
 const ARROWED_TAGS = ["MainProvision", "Part", "Chapter", "Section", "Article", "Paragraph"];
+
 function toc_recursive($book, $node, $depth, $id_parent, $pdo): void
 {
-    global $c_article;
     global $id_counter;
+    global $tableGateway;
+
+    $c_article = new \App\Model\Entity\Article();
 
     //MainProvision直下でないものはスキップ。必要な子要素は親から覗く
     $name = $node->nodeName;
@@ -83,14 +87,15 @@ function toc_recursive($book, $node, $depth, $id_parent, $pdo): void
     $c_article->title = $title;
     $c_article->name = $name;
     $c_article->caption = $caption;
-    $c_article->title = $title;
     if ($name == "Article") {
-        $c_article->article_xml = $node->ownerDocument->saveXML($node);
-        $c_article->save($pdo);
-        return;
+        // Articleノードはその中身（項・号など）をすべて含んだXMLとして保存
+        $xml_fragment = $node->ownerDocument->saveXML($node);
+        $c_article->article_xml = '<?xml version="1.0" encoding="UTF-8"?>' . $xml_fragment;
+        $tableGateway->insert($c_article->getArrayCopy()); // TableGatewayを使用
+        return; // Article以下のノードは個別にDB登録しないので、ここで再帰を終了（方針通り）
     }
     $c_article->article_xml = "txt";
-    $c_article->save($pdo);
+    $tableGateway->insert($c_article->getArrayCopy());
 
     // Article以下は上に戻っているので、それ以外で子要素がある場合再帰処理
     foreach ($node->childNodes as $child) {
@@ -113,9 +118,17 @@ function make_toc($book, $xml): void
 
 function main(): void
 {
-    global $id_me;
+    global $id_me, $tableGateway;
     # configの読み込み
     $config = require(__DIR__ . "/../config/config.php");
+    /*
+     * /config/autoload/dependencies.global.phpでAdapterのFactoryを登録(laminas-db付属)。
+    *  /config/autoload/local.phpに 'db' を登録
+    *  こうしておくと$containerから$adapterを引っ張ってこれる。
+    */
+    $container = require __DIR__ . '/../config/container.php';
+    $adapter = $container->get(\Laminas\Db\Adapter\AdapterInterface::class);
+    $tableGateway = new TableGateway('article', $adapter);
 
     # 法典IDの入ったXMLを取り込む
     if (!file_exists(PATH_TOC_XML)) {
@@ -126,14 +139,6 @@ function main(): void
         # あればローカルから
         $toc_xml = file_get_contents(PATH_TOC_XML);
     }
-
-    // 1. データベースへの接続 (ファイルがない場合は自動作成されます)
-    if (!file_exists(PATH_DB)) die("データベースファイルが見つかりません。");
-    $pdo = new PDO("sqlite:" . PATH_DB);
-
-    // エラーモードを例外に設定（デバッグしやすくなります）
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
 
 # configに書いている法令名からIDと本体をとってくる
     foreach ($config['books'] as $book) {

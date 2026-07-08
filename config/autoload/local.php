@@ -11,7 +11,8 @@ declare(strict_types=1);
 
 return [
     'db' => [
-        'dsn' => 'sqlite:' . __DIR__ . '/../../data/prebar.sqlite',
+        'driver' => 'Pdo_Sqlite',
+        'database' => __DIR__ . '/../../data/prebar.sqlite',
     ],
     'books' => [
         '010' => ['id' => '010', 'key' => '日本国憲法', 'abbr' => '憲法'],
