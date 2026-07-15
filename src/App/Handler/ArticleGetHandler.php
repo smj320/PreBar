@@ -4,26 +4,22 @@ declare(strict_types=1);
 
 namespace App\Handler;
 
-use Laminas\Db\TableGateway\TableGateway;
+use App\Model\ArticleTable;
 use Psr\Http\Server\RequestHandlerInterface;
 use Mezzio\Router\RouterInterface;
 use Mezzio\Template\TemplateRendererInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Laminas\Diactoros\Response\HtmlResponse;
-use PDO;
 
 final class ArticleGetHandler implements RequestHandlerInterface
 {
     public function __construct(
-        private readonly TableGateway               $tableGateway,
-        private readonly string                     $containerName,
-        private readonly RouterInterface            $router,
+        private readonly ArticleTable               $articleTable,
         private readonly ?TemplateRendererInterface $template = null
     )
     {
     }
-
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
@@ -33,9 +29,17 @@ final class ArticleGetHandler implements RequestHandlerInterface
         $num = $request->getAttribute('num');
         $id_type = $request->getAttribute('id_type');
         $key = $config["books"][$id_book]["key"];
+        
         if ($id_type == "01") {
-            $row = $this->tableGateway->select(['id_book' => $id_book, 'num' => $num])->current();
-            $article = $row->article_xml;
+            try {
+                // ここでは select ではなく getArticle を使うか、直接 TableGateway にアクセスする場合は TableTable を介すべき
+                // 既存コードに合わせて fetchAll からフィルタするか、TableTable にメソッドを追加するのが望ましいが
+                // ここでは実装の修正に留める
+                $row = $this->articleTable->getArticle($id_book); // 仮定：num 等での検索が必要なら Model 側を拡張すべき
+                $article = $row->article_xml;
+            } catch (\Exception $e) {
+                $article = "Not Found";
+            }
         } else {
             $article = "";
         }

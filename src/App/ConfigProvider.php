@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App;
 
+use Laminas\ServiceManager\AbstractFactory\ReflectionBasedAbstractFactory;
 use PDO;
 
 /**
@@ -37,9 +38,12 @@ class ConfigProvider
                 //Handler\PingHandler::class => Handler\PingHandler::class,
             ],
             'factories'  => [
-                Handler\HomePageHandler::class => Handler\HomePageHandlerFactory::class,
-                Handler\ArticleGetHandler::class => Handler\ArticleGetHandlerFactory::class,
-                Handler\ArticlePostHandler::class => Handler\ArticlePostHandlerFactory::class,
+                //Table
+                Model\ArticleTable::class => Model\ArticleTableFactory::class,
+                //Handler
+                Handler\HomePageHandler::class => ReflectionBasedAbstractFactory::class,
+                Handler\ArticleGetHandler::class => ReflectionBasedAbstractFactory::class,
+                Handler\ArticlePostHandler::class => ReflectionBasedAbstractFactory::class,
             ],
         ];
     }

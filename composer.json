@@ -55,6 +55,7 @@
         "laminas/laminas-config-aggregator": "^1.18",
         "laminas/laminas-db": "^2.22",
         "laminas/laminas-diactoros": "^3.8.0",
+        "laminas/laminas-form": "^3.24",
         "laminas/laminas-servicemanager": "^3.22",
         "laminas/laminas-stdlib": "^3.21",
         "mezzio/mezzio": "^3.23.1",

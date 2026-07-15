@@ -15,7 +15,6 @@ if (!file_exists($sqlFile)) {
 
 $sql = file_get_contents($sqlFile);
 
-// CREATE TABLE 文の抽出 (大まかなパース)
 if (!preg_match('/CREATE TABLE\s+(\w+)\s*\((.*)\)/is', $sql, $matches)) {
     echo "Could not find CREATE TABLE statement.\n";
     exit(1);
@@ -38,60 +37,32 @@ foreach ($columnDefs as $def) {
     $type = strtoupper($parts[1] ?? 'TEXT');
 
     $phpType = 'string';
-    $cast = '';
-
     if (strpos($type, 'INT') !== false) {
         $phpType = 'int';
-        $cast = '(int) ';
     } elseif (strpos($type, 'BOOL') !== false) {
         $phpType = 'bool';
-        $cast = '(bool) ';
     } elseif (strpos($type, 'FLOAT') !== false || strpos($type, 'DOUBLE') !== false || strpos($type, 'DECIMAL') !== false) {
         $phpType = 'float';
-        $cast = '(float) ';
     }
 
     $properties[] = [
         'name' => $name,
         'phpType' => $phpType,
-        'cast' => $cast
     ];
 }
 
-// コード生成
+// コード生成: exchangeArray/getArrayCopy を削除
 $code = "<?php\n\n";
 $code .= "declare(strict_types=1);\n\n";
 $code .= "namespace App\Model;\n\n";
-$code .= "/**\n";
-$code .= " * {$tableName} テーブルに対応するエンティティクラス\n";
-$code .= " */\n";
 $code .= "class {$entityName}\n";
 $code .= "{\n";
 
 foreach ($properties as $prop) {
+    // POPO なのでパブリックプロパティにするだけでOK
     $code .= "    public ?{$prop['phpType']} \${$prop['name']} = null;\n";
 }
 
-$code .= "\n    public function exchangeArray(array \$data): void\n";
-$code .= "    {\n";
-foreach ($properties as $prop) {
-    if ($prop['cast']) {
-        $code .= "        \$this->{$prop['name']} = isset(\$data['{$prop['name']}']) ? {$prop['cast']}\$data['{$prop['name']}'] : \$this->{$prop['name']};\n";
-    } else {
-        $code .= "        \$this->{$prop['name']} = \$data['{$prop['name']}'] ?? \$this->{$prop['name']};\n";
-    }
-}
-$code .= "    }\n";
-
-$code .= "\n    public function getArrayCopy(): array\n";
-$code .= "    {\n";
-$code .= "        return [\n";
-foreach ($properties as $prop) {
-    $code .= "            '{$prop['name']}' => \$this->{$prop['name']},\n";
-}
-$code .= "        ];\n";
-$code .= "    }\n";
 $code .= "}\n";
 
 echo $code;
-

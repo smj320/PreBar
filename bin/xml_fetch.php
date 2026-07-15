@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use App\Model\Entity\Article;
 use Laminas\Db\TableGateway\TableGateway;
 
 const URL_TOC = 'https://laws.e-gov.go.jp/api/1/lawlists/1?LawType=1';
@@ -62,7 +61,7 @@ function toc_recursive($book, $node, $depth, $id_parent, $pdo): void
     global $id_counter;
     global $tableGateway;
 
-    $c_article = new \App\Model\Entity\Article();
+    $c_article = new \App\Model\Article();
 
     //MainProvision直下でないものはスキップ。必要な子要素は親から覗く
     $name = $node->nodeName;
